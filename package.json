@@ -8,7 +8,7 @@
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "start": "npm run build && node dist/index.js",
     "install": "npm install",
-    "build": "tsc"
+    "build": "rimraf ./dist && tsc"
   },
   "keywords": [],
   "author": "justdankas",
