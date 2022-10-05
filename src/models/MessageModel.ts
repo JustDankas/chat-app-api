@@ -22,16 +22,13 @@ const MessageSchema = new mongoose.Schema<IMessage>({
     content:{
         type: String,
         required:true
-    }
-    // createdAt:{
-    //     type: Schema.Types.Date,
-    //     default:()=>new Date(Date.now())},
-    // updatedAt:{
-    //     type: Schema.Types.Date,
-    //     default:()=>new Date(Date.now())}
-},
-{
-    timestamps:true
+    },
+    createdAt:{
+        type: Schema.Types.Date,
+        default:()=>new Date(Date.now())},
+    updatedAt:{
+        type: Schema.Types.Date,
+        default:()=>new Date(Date.now())}
 }
 )
 
