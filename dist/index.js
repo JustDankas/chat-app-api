@@ -95,9 +95,6 @@ const GroupChatRoute_1 = require("./routes/GroupChatRoute");
 app.use('/groupChat', GroupChatRoute_1.groupChatRoute);
 // import {RoomRouter} from './routes/RoomRouter'
 // app.use('/room',RoomRouter)
-app.listen(process.env.PORT || 5000, () => {
+server.listen(process.env.PORT || 5000, () => {
     console.log(`App Listening to port ${process.env.PORT || 5000}`);
-});
-server.listen(5001, () => {
-    console.log(`Server Listening to port ${5001}`);
 });
