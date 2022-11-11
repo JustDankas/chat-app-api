@@ -26,17 +26,15 @@ app.use((0, cookie_parser_1.default)());
 app.use((0, cors_1.default)());
 const io = new socket_io_1.Server(server, {
     cors: {
-        origin: "*"
-    }
+        origin: "*",
+    },
 });
-const username = process.env.USER_DB;
-const password = process.env.PASSWORD;
-const uri = `mongodb+srv://${username}:${password}@myappcluster.kbtu0pi.mongodb.net/?retryWrites=true&w=majority`;
+const uri = `mongodb+srv://${process.env.USER_DB}:${process.env.PASSWORD}@myappcluster.kbtu0pi.mongodb.net/?retryWrites=true&w=majority`;
 function connect() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             yield mongoose_1.default.connect(uri);
-            console.log('Connected to database!');
+            console.log("Connected to database!");
         }
         catch (error) {
             console.log(error);
@@ -47,52 +45,52 @@ connect();
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: true }));
 let onlineUsers = [];
-io.on('connection', (socket) => {
-    socket.on('login', (user) => {
+io.on("connection", (socket) => {
+    socket.on("login", (user) => {
         console.log(user);
-        if (!onlineUsers.some(usr => usr.id == user._id)) {
+        if (!onlineUsers.some((usr) => usr.id == user._id)) {
             onlineUsers.push({
                 id: user._id,
-                socketId: socket.id
+                socketId: socket.id,
             });
         }
     });
-    socket.on('new-chat', (newChat, cb) => {
+    socket.on("new-chat", (newChat, cb) => {
         const findId = newChat.members[1]._id;
-        const receiver = onlineUsers.find(user => user.id == findId);
+        const receiver = onlineUsers.find((user) => user.id == findId);
         if (receiver) {
-            socket.to(receiver === null || receiver === void 0 ? void 0 : receiver.socketId).emit('get-new-chat', newChat);
+            socket.to(receiver === null || receiver === void 0 ? void 0 : receiver.socketId).emit("get-new-chat", newChat);
         }
         cb();
     });
-    socket.on('send-msg', (msg, chatId, cb) => {
-        socket.to(chatId).emit('receive-msg', msg, chatId);
-        cb('Message Sent!');
+    socket.on("send-msg", (msg, chatId, cb) => {
+        socket.to(chatId).emit("receive-msg", msg, chatId);
+        cb("Message Sent!");
     });
-    socket.on('join-chat', chatId => {
-        console.log(socket.id + ' joined ' + chatId);
+    socket.on("join-chat", (chatId) => {
+        console.log(socket.id + " joined " + chatId);
         socket.join(chatId);
     });
-    socket.on('group-chat-change', (groupChat, cb) => {
-        socket.to(groupChat._id).emit('update-group-chat', groupChat);
+    socket.on("group-chat-change", (groupChat, cb) => {
+        socket.to(groupChat._id).emit("update-group-chat", groupChat);
         cb();
     });
-    socket.on('group-chat-delete', (groupId, cb) => {
-        socket.to(groupId).emit('group-chat-deleted', groupId);
+    socket.on("group-chat-delete", (groupId, cb) => {
+        socket.to(groupId).emit("group-chat-deleted", groupId);
         cb();
     });
-    socket.on('disconnect', () => {
-        onlineUsers = onlineUsers.filter(user => user.socketId !== socket.id);
+    socket.on("disconnect", () => {
+        onlineUsers = onlineUsers.filter((user) => user.socketId !== socket.id);
     });
 });
 const UserRoute_1 = require("./routes/UserRoute");
-app.use('/users', UserRoute_1.userRouter);
+app.use("/users", UserRoute_1.userRouter);
 const ChatRoute_1 = require("./routes/ChatRoute");
-app.use('/chat', ChatRoute_1.chatRouter);
+app.use("/chat", ChatRoute_1.chatRouter);
 const MessageRoute_1 = require("./routes/MessageRoute");
-app.use('/message', MessageRoute_1.messageRoute);
+app.use("/message", MessageRoute_1.messageRoute);
 const GroupChatRoute_1 = require("./routes/GroupChatRoute");
-app.use('/groupChat', GroupChatRoute_1.groupChatRoute);
+app.use("/groupChat", GroupChatRoute_1.groupChatRoute);
 // import {RoomRouter} from './routes/RoomRouter'
 // app.use('/room',RoomRouter)
 server.listen(process.env.PORT || 5000, () => {

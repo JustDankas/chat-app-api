@@ -21,7 +21,7 @@ const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 const UserModel_1 = require("../models/UserModel");
 const generateToken_1 = __importDefault(require("../utils/generateToken"));
-router.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const users = yield UserModel_1.User.find();
         res.status(200).json(users);
@@ -31,9 +31,14 @@ router.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         res.sendStatus(500);
     }
 }));
-router.post('/find', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.post("/find", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const users = yield UserModel_1.User.find({ $and: [{ username: { $ne: req.body.requester } }, { username: { $regex: req.body.searchTerm } }] }, { password: 0 });
+        const users = yield UserModel_1.User.find({
+            $and: [
+                { username: { $ne: req.body.requester } },
+                { username: { $regex: req.body.searchTerm } },
+            ],
+        }, { password: 0 });
         res.status(200).json({ users });
     }
     catch (error) {
@@ -41,7 +46,7 @@ router.post('/find', (req, res) => __awaiter(void 0, void 0, void 0, function* (
         res.sendStatus(500);
     }
 }));
-router.put('/:userId', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.put("/:userId", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { userId } = req.params;
         const { newUsername } = req.body;
@@ -50,8 +55,8 @@ router.put('/:userId', (req, res) => __awaiter(void 0, void 0, void 0, function*
             const user = yield UserModel_1.User.findByIdAndUpdate(userId, { username: newUsername }, { new: true }).select({ email: 1, username: 1, id: 1 });
             if (user) {
                 const authToken = (0, generateToken_1.default)(user === null || user === void 0 ? void 0 : user.username, user === null || user === void 0 ? void 0 : user.email, user === null || user === void 0 ? void 0 : user.id);
-                res.cookie('session', authToken, {
-                    expires: new Date(Date.now() + 1000 * 60 * 60 * 24)
+                res.cookie("session", authToken, {
+                    expires: new Date(Date.now() + 1000 * 60 * 60 * 24),
                 });
                 res.status(200).json(user);
             }
@@ -60,7 +65,7 @@ router.put('/:userId', (req, res) => __awaiter(void 0, void 0, void 0, function*
             }
         }
         else {
-            res.status(400).send('Username exists!');
+            res.status(400).send("Username exists!");
         }
     }
     catch (error) {
@@ -69,12 +74,12 @@ router.put('/:userId', (req, res) => __awaiter(void 0, void 0, void 0, function*
     }
 }));
 // auto login
-router.get('/login', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.get("/login", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
-        const session = (_a = req.headers.cookie) === null || _a === void 0 ? void 0 : _a.split('=')[1];
+        const session = (_a = req.headers.cookie) === null || _a === void 0 ? void 0 : _a.split("=")[1];
         if (session) {
-            jsonwebtoken_1.default.verify(session, process.env.ACCESS_TOKEN || 'secondary', (err, user) => {
+            jsonwebtoken_1.default.verify(session, process.env.ACCESS_TOKEN || "secondary", (err, user) => {
                 if (err)
                     return res.sendStatus(403);
                 return res.status(200).json({ user });
@@ -100,7 +105,7 @@ router.get('/login', (req, res) => __awaiter(void 0, void 0, void 0, function* (
         res.sendStatus(500);
     }
 }));
-router.post('/login', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.post("/login", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { username, password } = req.body;
         const user = yield UserModel_1.User.findOne({ username });
@@ -108,40 +113,40 @@ router.post('/login', (req, res) => __awaiter(void 0, void 0, void 0, function* 
             const validPassword = yield user.matchPassword(password);
             if (validPassword) {
                 const authToken = (0, generateToken_1.default)(user.username, user.email, user.id);
-                res.cookie('session', authToken, {
-                    expires: new Date(Date.now() + 1000 * 60 * 60 * 24)
+                res.cookie("session", authToken, {
+                    expires: new Date(Date.now() + 1000 * 60 * 60 * 24),
                 });
                 res.status(200).json({
                     user: {
                         username: user.username,
                         email: user.email,
-                        _id: user.id
-                    }
+                        _id: user.id,
+                    },
                 });
             }
             else
-                res.status(404).json({ error: 'Incorrect password!' });
+                res.status(404).json({ error: "Incorrect password!" });
         }
         else
-            res.status(404).json({ error: 'Incorrect username!' });
+            res.status(404).json({ error: "Incorrect username!" });
     }
     catch (error) {
         console.log(error);
         res.sendStatus(500);
     }
 }));
-router.post('/register', validateCredentials, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.post("/register", validateCredentials, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const user = yield UserModel_1.User.create(req.body);
         yield user.save();
         const authToken = (0, generateToken_1.default)(user.username, user.email, user.id);
-        res.cookie('session', authToken);
+        res.cookie("session", authToken);
         res.status(200).json({
             user: {
                 username: user.username,
                 email: user.email,
-                _id: user.id
-            }
+                _id: user.id,
+            },
         });
     }
     catch (error) {
@@ -149,10 +154,10 @@ router.post('/register', validateCredentials, (req, res) => __awaiter(void 0, vo
         res.sendStatus(500);
     }
 }));
-router.delete('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.delete("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         yield UserModel_1.User.deleteMany();
-        res.status(200).send('deleted successfully!');
+        res.status(200).send("deleted successfully!");
     }
     catch (error) {
         console.log(error);
@@ -162,28 +167,32 @@ router.delete('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () 
 function validateCredentials(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         const { email, username, password } = req.body;
-        const usernameRgx = new RegExp(/[^a-z0-9]/, 'ig');
-        const numberRgx = new RegExp(/\d/, 'g');
-        const capsRgx = new RegExp(/[A-Z]/, 'g');
-        const lowsRgx = new RegExp(/[a-z]/, 'g');
+        const usernameRgx = new RegExp(/[^a-z0-9]/, "ig");
+        const numberRgx = new RegExp(/\d/, "g");
+        const capsRgx = new RegExp(/[A-Z]/, "g");
+        const lowsRgx = new RegExp(/[a-z]/, "g");
         const exists = yield UserModel_1.User.findOne({ $or: [{ username }, { email }] });
         if (exists) {
-            return res.status(400).send('Username or Email already taken');
+            return res.status(400).send("Username or Email already taken");
         }
         if (usernameRgx.test(username)) {
-            return res.status(400).send('Username must not contain special characters');
+            return res.status(400).send("Username must not contain special characters");
         }
         if (username.length < 4) {
-            return res.status(400).send('Username must be atleast 4 characters long');
+            return res.status(400).send("Username must be atleast 4 characters long");
         }
         if (password.length < 8) {
-            return res.status(400).send('Password must be atleast 8 characters long');
+            return res.status(400).send("Password must be atleast 8 characters long");
         }
         if (password.length < 8) {
-            return res.status(400).send('Password must contain atleast 1 number , capital letters and lowercase letters');
+            return res
+                .status(400)
+                .send("Password must contain atleast 1 number , capital letters and lowercase letters");
         }
-        if (!numberRgx.test(password) || !capsRgx.test(password) || !lowsRgx.test(password)) {
-            return res.status(400).send('Password must fit requirements');
+        if (!numberRgx.test(password) ||
+            !capsRgx.test(password) ||
+            !lowsRgx.test(password)) {
+            return res.status(400).send("Password must fit requirements");
         }
         next();
     });

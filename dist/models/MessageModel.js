@@ -39,15 +39,15 @@ const MessageSchema = new mongoose_1.default.Schema({
     content: {
         type: String,
         required: true
+    },
+    createdAt: {
+        type: mongoose_1.Schema.Types.Date,
+        default: () => new Date(Date.now())
+    },
+    updatedAt: {
+        type: mongoose_1.Schema.Types.Date,
+        default: () => new Date(Date.now())
     }
-    // createdAt:{
-    //     type: Schema.Types.Date,
-    //     default:()=>new Date(Date.now())},
-    // updatedAt:{
-    //     type: Schema.Types.Date,
-    //     default:()=>new Date(Date.now())}
-}, {
-    timestamps: true
 });
 const Message = mongoose_1.default.model('Message', MessageSchema);
 exports.Message = Message;
